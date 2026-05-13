@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== CSS Custom Properties for Dark Mode ===== */
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 11%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --radius: 0.75rem;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+  }
+
+  .dark {
+    --background: 224 72% 8%;
+    --foreground: 213 31% 91%;
+    --muted: 223 47% 19%;
+    --muted-foreground: 215.4 18% 65%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 216 34% 17%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --card: 224 71% 8%;
+    --card-foreground: 213 31% 91%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+}
+
+/* ===== Leaflet Map Styles ===== */
+.leaflet-container {
+  @apply z-0 h-full w-full rounded-xl;
+}
+
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  @apply bg-navy/90 text-white font-semibold rounded-full border-2 border-white shadow-soft;
+}
+
+.dark .marker-cluster-small,
+.dark .marker-cluster-medium,
+.dark .marker-cluster-large {
+  @apply bg-zinc-600/90 border-zinc-400;
+}
+
+/* ===== Dark Mode Toggle Button ===== */
+.dark-toggle {
+  @apply relative flex h-6 w-10 cursor-pointer items-center rounded-full bg-zinc-300 p-1 transition-colors duration-200 ease-in-out dark:bg-zinc-600;
+}
+
+.dark-toggle-indicator {
+  @apply pointer-events-none flex h-4 w-4 items-center justify-center rounded-full bg-white shadow transition-transform duration-200 ease-in-out dark:bg-zinc-800;
+}
+
+.dark .dark-toggle-indicator {
+  @apply translate-x-4;
+}
+
+/* ===== Scrollbar Styles ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-muted-foreground/30;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* ===== Focus Visible Styles ===== */
+:focus-visible {
+  @apply outline-none ring-2 ring-emerald-brand/30 ring-offset-2;
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    @apply bg-white text-black;
+  }
+}
+
+/* ===== Animation Utilities ===== */
+@layer utilities {
+  .animate-in {
+    animation: animateIn 0.3s ease-out;
+  }
+  
+  .slide-from-right {
+    animation: slideFromRight 0.3s ease-out;
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+}
+
+@keyframes animateIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideFromRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

@@ -1,0 +1,22 @@
+  "description": "Marketplace inmobiliario para LATAM. Encuentra y publica propiedades verificadas en RD.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0F172A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "lifestyle"],
+  "lang": "es-DO",
+  "dir": "ltr"
+}

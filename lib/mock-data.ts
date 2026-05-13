@@ -1,0 +1,847 @@
+export type PropertyType = "venta" | "alquiler";
+export type PropertyStatus = "activa" | "pausada" | "destacada";
+
+export interface Property {
+  id: string;
+  title: string;
+  slug: string;
+  price: number;
+  currency: "DOP" | "USD";
+  type: PropertyType;
+  category: string;
+  city: string;
+  zone: string;
+  beds: number;
+  baths: number;
+  areaM2: number;
+  verified: boolean;
+  featured: boolean;
+  /** Patrocinio pago: carrusel promocional en inicio */
+  promo?: boolean;
+  image: string;
+  images: string[];
+  lat: number;
+  lng: number;
+  amenities: string[];
+  description: string;
+}
+
+function img(seed: string, w: 1200 | 800 = 1200): string {
+  return `https://picsum.photos/seed/${seed}/${w}/800`;
+}
+
+function gallery(
+  main: string,
+  a: string,
+  b: string,
+  c: string,
+  d: string
+): string[] {
+  return [img(main, 1200), img(a, 800), img(b, 800), img(c, 800), img(d, 800)];
+}
+
+export const MOCK_PROPERTIES: Property[] = [
+  {
+    id: "1",
+    title: "Penthouse con vista al mar — Piantini",
+    slug: "penthouse-piantini",
+    price: 285000,
+    currency: "USD",
+    type: "venta",
+    category: "Penthouse",
+    city: "Santo Domingo",
+    zone: "Piantini",
+    beds: 4,
+    baths: 3,
+    areaM2: 220,
+    verified: true,
+    featured: true,
+    promo: true,
+    image: img("1600596542815-ffad4c1539a9"),
+    images: gallery(
+      "1600596542815-ffad4c1539a9",
+      "1600585154340-be6161a56a0c",
+      "1600566753190-17f0baa2a6c3",
+      "1600047509807-ba8f99d2cdde",
+      "1600573472592-401b489a3cdc"
+    ),
+    lat: 18.4737,
+    lng: -69.9294,
+    amenities: [
+      "parking",
+      "gym",
+      "pool",
+      "security",
+      "elevator",
+      "terrace",
+      "concierge",
+      "ocean-view",
+    ],
+    description:
+      "Exclusivo penthouse con acabados premium, terraza privada y vista panorámica.",
+  },
+  {
+    id: "2",
+    title: "Villa moderna en Casa de Campo",
+    slug: "villa-casa-de-campo",
+    price: 1250000,
+    currency: "USD",
+    type: "venta",
+    category: "Villa",
+    city: "La Romana",
+    zone: "Casa de Campo",
+    beds: 6,
+    baths: 5,
+    areaM2: 480,
+    verified: true,
+    featured: true,
+    promo: true,
+    image: img("1613490493576-7fde63acd811"),
+    images: gallery(
+      "1613490493576-7fde63acd811",
+      "1600585154526-990dced4db0d",
+      "1600607687939-ce8a6c25118c",
+      "1600566753089-00f18fb6b3ea",
+      "1600585154363-67eb9e2e2099"
+    ),
+    lat: 18.4274,
+    lng: -68.9028,
+    amenities: ["pool", "garden", "security", "parking", "terrace", "gym", "golf", "marina"],
+    description:
+      "Villa contemporánea con piscina infinita y acceso a amenidades del resort.",
+  },
+  {
+    id: "3",
+    title: "Apartamento ejecutivo Naco",
+    slug: "apto-naco",
+    price: 3200,
+    currency: "USD",
+    type: "alquiler",
+    category: "Apartamento",
+    city: "Santo Domingo",
+    zone: "Naco",
+    beds: 3,
+    baths: 2,
+    areaM2: 145,
+    verified: true,
+    featured: false,
+    image: img("1600585154084-4e5fe7c39198"),
+    images: gallery(
+      "1600585154084-4e5fe7c39198",
+      "1600566752355-35792bedcfea",
+      "1600573472591-9b3b24601c27",
+      "1600585152915-d0bec9a8d369",
+      "1600607687644-c7171b42498f"
+    ),
+    lat: 18.4655,
+    lng: -69.9312,
+    amenities: ["parking", "elevator", "security", "gym", "wifi", "ac", "furnished"],
+    description:
+      "Ideal para ejecutivos. Ubicación premium cerca de restaurantes y coworkings.",
+  },
+  {
+    id: "4",
+    title: "Townhouse en Punta Cana Village",
+    slug: "townhouse-punta-cana",
+    price: 410000,
+    currency: "USD",
+    type: "venta",
+    category: "Townhouse",
+    city: "Punta Cana",
+    zone: "Punta Cana Village",
+    beds: 3,
+    baths: 3,
+    areaM2: 190,
+    verified: false,
+    featured: false,
+    image: img("1600585154340-be6161a56a0c"),
+    images: gallery(
+      "1600585154340-be6161a56a0c",
+      "1600596542815-ffad4c1539a9",
+      "1600047509358-9dc75507daeb",
+      "1600573472550-8090b5e0745e",
+      "1600585154526-990dced4db0d"
+    ),
+    lat: 18.5601,
+    lng: -68.3725,
+    amenities: ["pool", "garden", "parking", "security", "beach-access"],
+    description:
+      "Townhouse con jardín privado, a minutos de playas y del aeropuerto.",
+  },
+  {
+    id: "5",
+    title: "Loft industrial en Zona Colonial",
+    slug: "loft-zona-colonial",
+    price: 185000,
+    currency: "USD",
+    type: "venta",
+    category: "Loft",
+    city: "Santo Domingo",
+    zone: "Ciudad Colonial",
+    beds: 2,
+    baths: 2,
+    areaM2: 110,
+    verified: true,
+    featured: false,
+    image: img("1600566753190-17f0baa2a6c3"),
+    images: gallery(
+      "1600566753190-17f0baa2a6c3",
+      "1600585154084-4e5fe7c39198",
+      "1600607687644-c7171b42498f",
+      "1600585152915-d0bec9a8d369",
+      "1600573472592-401b489a3cdc"
+    ),
+    lat: 18.4733,
+    lng: -69.8828,
+    amenities: ["terrace", "elevator", "security", "wifi", "balcony"],
+    description:
+      "Loft con techos altos, luz natural y estética industrial refinada.",
+  },
+  {
+    id: "6",
+    title: "Terreno comercial Av. Winston Churchill",
+    slug: "terreno-churchill",
+    price: 450000,
+    currency: "USD",
+    type: "venta",
+    category: "Terreno",
+    city: "Santo Domingo",
+    zone: "Ensanche Julieta",
+    beds: 0,
+    baths: 0,
+    areaM2: 800,
+    verified: true,
+    featured: false,
+    image: img("1500382017468-9049fed747ef"),
+    images: gallery(
+      "1500382017468-9049fed747ef",
+      "1506905925346-21bda4d32df4",
+      "1469474968028-56623f02e42e",
+      "1441974231531-c6227db76b6e",
+      "1472214103451-9374bd1c798e"
+    ),
+    lat: 18.4689,
+    lng: -69.9421,
+    amenities: ["corner", "high-traffic", "fence"],
+    description:
+      "Esquina de alto tráfico, ideal para desarrollo mixto o retail flagship.",
+  },
+  {
+    id: "7",
+    title: "Estudio amueblado cerca de UASD — Gazcue",
+    slug: "estudio-gazcue",
+    price: 28500,
+    currency: "DOP",
+    type: "alquiler",
+    category: "Estudio",
+    city: "Santo Domingo",
+    zone: "Gazcue",
+    beds: 0,
+    baths: 1,
+    areaM2: 38,
+    verified: true,
+    featured: false,
+    image: img("1522708323599-db24b4457511"),
+    images: gallery(
+      "1522708323599-db24b4457511",
+      "1522771739751-040224844ccd",
+      "1502672260360-1e396f95f231",
+      "1519710164239-f1232a1c8faf",
+      "1484156428450-ac63062197b0"
+    ),
+    lat: 18.4712,
+    lng: -69.9011,
+    amenities: ["furnished", "wifi", "ac", "elevator", "security"],
+    description:
+      "Estudio listo para habitar: cama queen, cocina integral y internet de alta velocidad.",
+  },
+  {
+    id: "8",
+    title: "Villa frente al mar en Cap Cana",
+    slug: "villa-cap-cana",
+    price: 2390000,
+    currency: "USD",
+    type: "venta",
+    category: "Villa",
+    city: "Punta Cana",
+    zone: "Cap Cana",
+    beds: 5,
+    baths: 5,
+    areaM2: 520,
+    verified: true,
+    featured: true,
+    promo: true,
+    image: img("1600585154526-990dced4db0d"),
+    images: gallery(
+      "1600585154526-990dced4db0d",
+      "1613490493576-7fde63acd811",
+      "1600607687939-ce8a6c25118c",
+      "1600566753089-00f18fb6b3ea",
+      "1600596542815-ffad4c1539a9"
+    ),
+    lat: 18.5004,
+    lng: -68.4042,
+    amenities: [
+      "pool",
+      "garden",
+      "parking",
+      "security",
+      "ocean-view",
+      "beach-access",
+      "golf",
+      "marina",
+    ],
+    description:
+      "Residencia signature con muelle privado opcional y amenidades de resort.",
+  },
+  {
+    id: "9",
+    title: "Local comercial esquina — Los Jardines",
+    slug: "local-jardines-santiago",
+    price: 185000,
+    currency: "USD",
+    type: "venta",
+    category: "Local comercial",
+    city: "Santiago",
+    zone: "Los Jardines",
+    beds: 0,
+    baths: 2,
+    areaM2: 165,
+    verified: true,
+    featured: false,
+    image: img("1449844908841-aa7e82bbb350"),
+    images: gallery(
+      "1449844908841-aa7e82bbb350",
+      "1486403099049-887da5d23fe5",
+      "1497366212318-037378903953",
+      "1503387762-592deb58ef4e",
+      "1484156428450-ac63062197b0"
+    ),
+    lat: 19.4512,
+    lng: -70.7045,
+    amenities: ["corner", "high-traffic", "parking", "storage", "commercial-ready"],
+    description:
+      "Planta libre con doble altura, ideal para retail, farmacia o showroom.",
+  },
+  {
+    id: "10",
+    title: "Oficina Class A — Torre en Piantini",
+    slug: "oficina-piantini",
+    price: 4500,
+    currency: "USD",
+    type: "alquiler",
+    category: "Oficina",
+    city: "Santo Domingo",
+    zone: "Piantini",
+    beds: 0,
+    baths: 2,
+    areaM2: 210,
+    verified: true,
+    featured: false,
+    image: img("1497366811353-3870884e606f"),
+    images: gallery(
+      "1497366811353-3870884e606f",
+      "1504384308090-c894fdcc1d34",
+      "1524750919432-9391c09a52a1",
+      "1517245385007-15d4d07b59dd",
+      "1497215843000-955c57177f1c"
+    ),
+    lat: 18.4751,
+    lng: -69.9268,
+    amenities: ["elevator", "security", "parking", "coworking", "wifi", "concierge"],
+    description:
+      "Módulo corporativo con vista ciudad, recepción y acceso controlado 24/7.",
+  },
+  {
+    id: "11",
+    title: "Finca con río y casa de madera — Jarabacoa",
+    slug: "finca-jarabacoa",
+    price: 320000,
+    currency: "USD",
+    type: "venta",
+    category: "Finca",
+    city: "Jarabacoa",
+    zone: "Buena Vista",
+    beds: 4,
+    baths: 3,
+    areaM2: 320,
+    verified: true,
+    featured: true,
+    image: img("1500382017468-9049fed747ef"),
+    images: gallery(
+      "1500382017468-9049fed747ef",
+      "1441974231531-c6227db76b6e",
+      "1472214103451-9374bd1c798e",
+      "1506905925346-21bda4d32df4",
+      "1469474968028-56623f02e42e"
+    ),
+    lat: 19.1189,
+    lng: -70.6481,
+    amenities: ["garden", "parking", "solar", "storage", "pet-friendly"],
+    description:
+      "Altitud fresca, parcela mixta agrícola-recreativa y casa principal en pino.",
+  },
+  {
+    id: "12",
+    title: "Apartamento vista mar — Playa Dorada",
+    slug: "apto-playa-dorada",
+    price: 195000,
+    currency: "USD",
+    type: "venta",
+    category: "Apartamento",
+    city: "Puerto Plata",
+    zone: "Playa Dorada",
+    beds: 2,
+    baths: 2,
+    areaM2: 98,
+    verified: false,
+    featured: false,
+    image: img("1502672260360-1e396f95f231"),
+    images: gallery(
+      "1502672260360-1e396f95f231",
+      "1522771739751-040224844ccd",
+      "1519710164239-f1232a1c8faf",
+      "1484156428450-ac63062197b0",
+      "1522708323599-db24b4457511"
+    ),
+    lat: 19.7586,
+    lng: -70.7261,
+    amenities: ["pool", "parking", "security", "ocean-view", "wifi", "balcony"],
+    description:
+      "Torre con acceso a playa, ideal inversión vacacional o Airbnb regulado.",
+  },
+  {
+    id: "13",
+    title: "Penthouse sky lounge — Cabeza de Toro",
+    slug: "penthouse-cabeza-toro",
+    price: 890000,
+    currency: "USD",
+    type: "venta",
+    category: "Penthouse",
+    city: "Punta Cana",
+    zone: "Cabeza de Toro",
+    beds: 3,
+    baths: 3,
+    areaM2: 240,
+    verified: true,
+    featured: true,
+    promo: true,
+    image: img("1600607687939-ce8a6c25118c"),
+    images: gallery(
+      "1600607687939-ce8a6c25118c",
+      "1600596542815-ffad4c1539a9",
+      "1600585154340-be6161a56a0c",
+      "1600566753190-17f0baa2a6c3",
+      "1600047509807-ba8f99d2cdde"
+    ),
+    lat: 18.4829,
+    lng: -68.3588,
+    amenities: ["pool", "gym", "terrace", "security", "elevator", "spa", "concierge"],
+    description:
+      "Sky lounge privado, domótica y acabados importados. Listo para llaves.",
+  },
+  {
+    id: "14",
+    title: "Terreno residencial en Veron",
+    slug: "terreno-veron",
+    price: 95000,
+    currency: "USD",
+    type: "venta",
+    category: "Terreno",
+    city: "Punta Cana",
+    zone: "Veron",
+    beds: 0,
+    baths: 0,
+    areaM2: 500,
+    verified: true,
+    featured: false,
+    image: img("1469474968028-56623f02e42e"),
+    images: gallery(
+      "1469474968028-56623f02e42e",
+      "1500382017468-9049fed747ef",
+      "1441974231531-c6227db76b6e",
+      "1472214103451-9374bd1c798e",
+      "1506905925346-21bda4d32df4"
+    ),
+    lat: 18.6144,
+    lng: -68.4112,
+    amenities: ["fence", "high-traffic"],
+    description:
+      "Lote plano con servicios en vía de extensión. Documentación al día.",
+  },
+  {
+    id: "15",
+    title: "Edificio de apartamentos — renta consolidada",
+    slug: "edificio-san-pedro",
+    price: 1850000,
+    currency: "USD",
+    type: "venta",
+    category: "Edificio",
+    city: "San Pedro de Macorís",
+    zone: "Centro",
+    beds: 0,
+    baths: 0,
+    areaM2: 980,
+    verified: true,
+    featured: false,
+    image: img("1484156428450-ac63062197b0"),
+    images: gallery(
+      "1484156428450-ac63062197b0",
+      "1497366212318-037378903953",
+      "1503387762-592deb58ef4e",
+      "1449844908841-aa7e82bbb350",
+      "1486403099049-887da5d23fe5"
+    ),
+    lat: 18.4574,
+    lng: -69.3064,
+    amenities: ["parking", "security", "elevator", "storage", "commercial-ready"],
+    description:
+      "Activo mixto con 12 unidades en operación y estacionamiento techado.",
+  },
+  {
+    id: "16",
+    title: "Estudio económico — Andrés, Boca Chica",
+    slug: "estudio-boca-chica",
+    price: 12000,
+    currency: "DOP",
+    type: "alquiler",
+    category: "Estudio",
+    city: "Boca Chica",
+    zone: "Andrés",
+    beds: 0,
+    baths: 1,
+    areaM2: 32,
+    verified: false,
+    featured: false,
+    image: img("1522771739751-040224844ccd"),
+    images: gallery(
+      "1522771739751-040224844ccd",
+      "1519710164239-f1232a1c8faf",
+      "1502672260360-1e396f95f231",
+      "1522708323599-db24b4457511",
+      "1484156428450-ac63062197b0"
+    ),
+    lat: 18.4449,
+    lng: -69.6102,
+    amenities: ["wifi", "ac", "furnished"],
+    description:
+      "Opción accesible cerca de playa pública, ideal estudiantes o nómadas.",
+  },
+  {
+    id: "17",
+    title: "Nave industrial con andén — Haina",
+    slug: "nave-haina",
+    price: 420000,
+    currency: "USD",
+    type: "venta",
+    category: "Nave industrial",
+    city: "San Cristóbal",
+    zone: "Haina",
+    beds: 0,
+    baths: 2,
+    areaM2: 1850,
+    verified: true,
+    featured: false,
+    image: img("1503387762-592deb58ef4e"),
+    images: gallery(
+      "1503387762-592deb58ef4e",
+      "1497366212318-037378903953",
+      "1486403099049-887da5d23fe5",
+      "1449844908841-aa7e82bbb350",
+      "1484156428450-ac63062197b0"
+    ),
+    lat: 18.4191,
+    lng: -70.0364,
+    amenities: ["storage", "fence", "high-traffic", "parking", "commercial-ready"],
+    description:
+      "Techos altos, muelle nivelado y subestación eléctrica dedicada.",
+  },
+  {
+    id: "18",
+    title: "Hotel boutique 12 habitaciones — Las Terrenas",
+    slug: "hotel-las-terrenas",
+    price: 2400000,
+    currency: "USD",
+    type: "venta",
+    category: "Hotel / hospedaje",
+    city: "Samaná",
+    zone: "Las Terrenas",
+    beds: 12,
+    baths: 14,
+    areaM2: 640,
+    verified: true,
+    featured: true,
+    promo: true,
+    image: img("1566073771259-6a8506099945"),
+    images: gallery(
+      "1566073771259-6a8506099945",
+      "1517248135467-4c7edcad34c4",
+      "1497215843000-955c57177f1c",
+      "1504384308090-c894fdcc1d34",
+      "1524750919432-9391c09a52a1"
+    ),
+    lat: 19.321,
+    lng: -69.5389,
+    amenities: ["pool", "restaurant", "spa", "parking", "wifi", "beach-access"],
+    description:
+      "Operación turística establecida con OTA, restaurante y spa al aire libre.",
+  },
+  {
+    id: "19",
+    title: "Apartamento nuevo — Ciudad Juan Bosch",
+    slug: "apto-ciudad-juan-bosch",
+    price: 118000,
+    currency: "USD",
+    type: "venta",
+    category: "Apartamento",
+    city: "Santo Domingo Este",
+    zone: "Ciudad Juan Bosch",
+    beds: 3,
+    baths: 2,
+    areaM2: 105,
+    verified: true,
+    featured: false,
+    image: img("1600566753089-00f18fb6b3ea"),
+    images: gallery(
+      "1600566753089-00f18fb6b3ea",
+      "1600585154084-4e5fe7c39198",
+      "1600607687644-c7171b42498f",
+      "1600566752355-35792bedcfea",
+      "1600573472591-9b3b24601c27"
+    ),
+    lat: 18.5021,
+    lng: -69.8425,
+    amenities: ["pool", "gym", "parking", "security", "elevator", "pet-friendly"],
+    description:
+      "Proyecto cerrado con áreas sociales, circuito cerrado y parque infantil.",
+  },
+  {
+    id: "20",
+    title: "Villa mediterránea — Costámbar",
+    slug: "villa-costambar",
+    price: 575000,
+    currency: "USD",
+    type: "venta",
+    category: "Villa",
+    city: "Puerto Plata",
+    zone: "Costámbar",
+    beds: 4,
+    baths: 4,
+    areaM2: 310,
+    verified: true,
+    featured: false,
+    promo: true,
+    image: img("1600585154363-67eb9e2e2099"),
+    images: gallery(
+      "1600585154363-67eb9e2e2099",
+      "1613490493576-7fde63acd811",
+      "1600585154526-990dced4db0d",
+      "1600596542815-ffad4c1539a9",
+      "1600607687939-ce8a6c25118c"
+    ),
+    lat: 19.7668,
+    lng: -70.6984,
+    amenities: ["pool", "garden", "parking", "security", "ocean-view", "solar"],
+    description:
+      "Residencia unifamiliar con paneles solares y generador de respaldo.",
+  },
+  {
+    id: "21",
+    title: "Suite corporativa amueblada — Naco",
+    slug: "oficina-coworking-naco",
+    price: 2800,
+    currency: "USD",
+    type: "alquiler",
+    category: "Oficina",
+    city: "Santo Domingo",
+    zone: "Naco",
+    beds: 0,
+    baths: 1,
+    areaM2: 68,
+    verified: true,
+    featured: false,
+    image: img("1524750919432-9391c09a52a1"),
+    images: gallery(
+      "1524750919432-9391c09a52a1",
+      "1497366811353-3870884e606f",
+      "1504384308090-c894fdcc1d34",
+      "1517245385007-15d4d07b59dd",
+      "1497215843000-955c57177f1c"
+    ),
+    lat: 18.4682,
+    lng: -69.9344,
+    amenities: ["wifi", "furnished", "coworking", "concierge", "ac", "elevator"],
+    description:
+      "Módulo plug & play con salas de juntas compartidas y café ilimitado.",
+  },
+  {
+    id: "22",
+    title: "Townhouse familiar — Alma Rosa",
+    slug: "townhouse-alma-rosa",
+    price: 225000,
+    currency: "USD",
+    type: "venta",
+    category: "Townhouse",
+    city: "Santo Domingo Este",
+    zone: "Alma Rosa",
+    beds: 3,
+    baths: 2,
+    areaM2: 155,
+    verified: true,
+    featured: false,
+    image: img("1600047509358-9dc75507daeb"),
+    images: gallery(
+      "1600047509358-9dc75507daeb",
+      "1600573472550-8090b5e0745e",
+      "1600585154340-be6161a56a0c",
+      "1600566753190-17f0baa2a6c3",
+      "1600585154084-4e5fe7c39198"
+    ),
+    lat: 18.4892,
+    lng: -69.8544,
+    amenities: ["parking", "garden", "security", "pet-friendly", "storage"],
+    description:
+      "Conjunto cerrado con vigilancia, patio trasero y cuarto de servicio.",
+  },
+  {
+    id: "23",
+    title: "Apartamento amueblado — San Isidro",
+    slug: "apto-san-isidro",
+    price: 42000,
+    currency: "DOP",
+    type: "alquiler",
+    category: "Apartamento",
+    city: "Santo Domingo Este",
+    zone: "San Isidro",
+    beds: 2,
+    baths: 2,
+    areaM2: 78,
+    verified: false,
+    featured: false,
+    image: img("1600585152915-d0bec9a8d369"),
+    images: gallery(
+      "1600585152915-d0bec9a8d369",
+      "1600607687644-c7171b42498f",
+      "1600566752355-35792bedcfea",
+      "1600573472591-9b3b24601c27",
+      "1600585154084-4e5fe7c39198"
+    ),
+    lat: 18.4955,
+    lng: -69.8688,
+    amenities: ["furnished", "wifi", "ac", "parking", "elevator"],
+    description:
+      "Segundo nivel con balcón, lista para mudanza inmediata cerca de la 30 de Mayo.",
+  },
+  {
+    id: "24",
+    title: "Local gastronómico — Calle El Conde",
+    slug: "local-el-conde",
+    price: 6500,
+    currency: "USD",
+    type: "alquiler",
+    category: "Local comercial",
+    city: "Santo Domingo",
+    zone: "Ciudad Colonial",
+    beds: 0,
+    baths: 2,
+    areaM2: 95,
+    verified: true,
+    featured: false,
+    image: img("1517248135467-4c7edcad34c4"),
+    images: gallery(
+      "1517248135467-4c7edcad34c4",
+      "1559339352-11d035aa7088",
+      "1414235072234-24c17ae8ebd0",
+      "1555396273-367ea4eb4db5",
+      "1544148105-1c101a893c91"
+    ),
+    lat: 18.4736,
+    lng: -69.8844,
+    amenities: ["high-traffic", "terrace", "commercial-ready", "storage"],
+    description:
+      "Frente peatonal alto flujo, listo para gastrobar o retail especializado.",
+  },
+  {
+    id: "25",
+    title: "Solares en proyecto Bávaro — inversión",
+    slug: "lotes-bavaro",
+    price: 78000,
+    currency: "USD",
+    type: "venta",
+    category: "Terreno",
+    city: "Punta Cana",
+    zone: "Bávaro",
+    beds: 0,
+    baths: 0,
+    areaM2: 300,
+    verified: true,
+    featured: false,
+    image: img("1472214103451-9374bd1c798e"),
+    images: gallery(
+      "1472214103451-9374bd1c798e",
+      "1469474968028-56623f02e42e",
+      "1500382017468-9049fed747ef",
+      "1441974231531-c6227db76b6e",
+      "1506905925346-21bda4d32df4"
+    ),
+    lat: 18.5367,
+    lng: -68.4049,
+    amenities: ["fence", "beach-access"],
+    description:
+      "Paquete de dos solares contiguos, planos y con estudios de suelo disponibles.",
+  },
+  {
+    id: "26",
+    title: "Barahona cliff villa — vista Caribe",
+    slug: "villa-barahona",
+    price: 410000,
+    currency: "USD",
+    type: "venta",
+    category: "Villa",
+    city: "Barahona",
+    zone: "Paraíso",
+    beds: 4,
+    baths: 3,
+    areaM2: 260,
+    verified: false,
+    featured: false,
+    image: img("1506905925346-21bda4d32df4"),
+    images: gallery(
+      "1506905925346-21bda4d32df4",
+      "1469474968028-56623f02e42e",
+      "1472214103451-9374bd1c798e",
+      "1441974231531-c6227db76b6e",
+      "1500382017468-9049fed747ef"
+    ),
+    lat: 18.2089,
+    lng: -71.0887,
+    amenities: ["pool", "terrace", "ocean-view", "parking", "solar"],
+    description:
+      "Arquitectura orgánica sobre acantilado, brisa constante y acceso a cala privada.",
+  },
+];
+
+export function getPromotionalProperties(): Property[] {
+  return MOCK_PROPERTIES.filter((p) => p.promo === true);
+}
+
+export function getPropertyById(id: string): Property | undefined {
+  return MOCK_PROPERTIES.find((p) => p.id === id);
+}
+
+export function getSimilarProperties(
+  current: Property,
+  limit = 3
+): Property[] {
+  const sameCity = MOCK_PROPERTIES.filter(
+    (p) => p.id !== current.id && p.city === current.city
+  );
+  if (sameCity.length >= limit) return sameCity.slice(0, limit);
+  const sameCategory = MOCK_PROPERTIES.filter(
+    (p) =>
+      p.id !== current.id &&
+      p.category === current.category &&
+      !sameCity.some((s) => s.id === p.id)
+  );
+  return [...sameCity, ...sameCategory].slice(0, limit);
+}
