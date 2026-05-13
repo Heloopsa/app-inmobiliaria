@@ -2,6 +2,8 @@
 -- InmueblePro — Initial Schema (Open Source)
 -- Supabase / PostgreSQL 15
 -- =====================================================
+-- Esta migración es segura para ejecutar múltiples veces.
+-- Usa IF NOT EXISTS para evitar errores si las tablas ya existen.
 
 -- Enable UUID extension
 create extension if not exists "uuid-ossp" with schema public;
@@ -9,7 +11,7 @@ create extension if not exists "uuid-ossp" with schema public;
 -- =====================================================
 -- 1. PROFILES — perfiles de usuarios
 -- =====================================================
-create table public.profiles (
+create table if not exists public.profiles (
   id uuid not null primary key references auth.users(id) on delete cascade,
   full_name text not null,
   email text not null,
@@ -25,7 +27,7 @@ create table public.profiles (
   updated_at timestamp with time zone not null default now()
 );
 
-create index idx_profiles_role on public.profiles(role);
+create index if not exists idx_profiles_role on public.profiles(role);
 
 -- Trigger to auto-update updated_at
 create or replace function public.handle_profiles_updated_at()
@@ -36,14 +38,19 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger profiles_updated_at
-  before update on public.profiles
-  for each row execute procedure public.handle_profiles_updated_at();
+do $$
+begin
+  if not exists (select 1 from pg_trigger where tgname = 'profiles_updated_at') then
+    create trigger profiles_updated_at
+      before update on public.profiles
+      for each row execute procedure public.handle_profiles_updated_at();
+  end if;
+end $$;
 
 -- =====================================================
 -- 2. PROPERTIES — propiedades publicadas
 -- =====================================================
-create table public.properties (
+create table if not exists public.properties (
   id uuid not null primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
   title text not null,
@@ -68,13 +75,13 @@ create table public.properties (
   updated_at timestamp with time zone not null default now()
 );
 
-create index idx_properties_status on public.properties(status) where status = 'aprobada';
-create index idx_properties_city on public.properties(city);
-create index idx_properties_category on public.properties(category);
-create index idx_properties_deal_type on public.properties(deal_type);
-create index idx_properties_user on public.properties(user_id);
-create index idx_properties_slug on public.properties(slug);
-create index idx_properties_price on public.properties(price);
+create index if not exists idx_properties_status on public.properties(status) where status = 'aprobada';
+create index if not exists idx_properties_city on public.properties(city);
+create index if not exists idx_properties_category on public.properties(category);
+create index if not exists idx_properties_deal_type on public.properties(deal_type);
+create index if not exists idx_properties_user on public.properties(user_id);
+create index if not exists idx_properties_slug on public.properties(slug);
+create index if not exists idx_properties_price on public.properties(price);
 
 -- Trigger to auto-update updated_at
 create or replace function public.handle_properties_updated_at()
@@ -88,14 +95,19 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger properties_updated_at
-  before update on public.properties
-  for each row execute procedure public.handle_properties_updated_at();
+do $$
+begin
+  if not exists (select 1 from pg_trigger where tgname = 'properties_updated_at') then
+    create trigger properties_updated_at
+      before update on public.properties
+      for each row execute procedure public.handle_properties_updated_at();
+  end if;
+end $$;
 
 -- =====================================================
 -- 3. PROPERTY IMAGES — imágenes de propiedades
 -- =====================================================
-create table public.property_images (
+create table if not exists public.property_images (
   id uuid not null primary key default gen_random_uuid(),
   property_id uuid not null references public.properties(id) on delete cascade,
   url text not null,
@@ -104,12 +116,12 @@ create table public.property_images (
   created_at timestamp with time zone not null default now()
 );
 
-create index idx_property_images_property on public.property_images(property_id);
+create index if not exists idx_property_images_property on public.property_images(property_id);
 
 -- =====================================================
 -- 4. PROPERTY VIEWS — analíticas de vistas
 -- =====================================================
-create table public.property_views (
+create table if not exists public.property_views (
   id uuid not null primary key default gen_random_uuid(),
   property_id uuid not null references public.properties(id) on delete cascade,
   ip_address inet,
@@ -117,13 +129,13 @@ create table public.property_views (
   viewed_at timestamp with time zone not null default now()
 );
 
-create index idx_property_views_property on public.property_views(property_id);
-create index idx_property_views_date on public.property_views(viewed_at);
+create index if not exists idx_property_views_property on public.property_views(property_id);
+create index if not exists idx_property_views_date on public.property_views(viewed_at);
 
 -- =====================================================
 -- 5. CONTACT REQUESTS — solicitudes de contacto
 -- =====================================================
-create table public.contact_requests (
+create table if not exists public.contact_requests (
   id uuid not null primary key default gen_random_uuid(),
   property_id uuid not null references public.properties(id) on delete cascade,
   sender_name text not null,
@@ -134,8 +146,8 @@ create table public.contact_requests (
   created_at timestamp with time zone not null default now()
 );
 
-create index idx_contact_requests_property on public.contact_requests(property_id);
-create index idx_contact_requests_status on public.contact_requests(status);
+create index if not exists idx_contact_requests_property on public.contact_requests(property_id);
+create index if not exists idx_contact_requests_status on public.contact_requests(status);
 
 -- =====================================================
 -- ROW LEVEL SECURITY (RLS) Policies
@@ -144,67 +156,100 @@ create index idx_contact_requests_status on public.contact_requests(status);
 -- Profiles
 alter table public.profiles enable row level security;
 
--- Todos pueden leer perfiles públicos
-create policy profiles_public_read on public.profiles
-  for select using (true);
+do $$
+begin
+  -- Crear policies solo si no existen
+  if not exists (select 1 from pg_policies where policyname = 'profiles_public_read') then
+    create policy profiles_public_read on public.profiles
+      for select using (true);
+  end if;
 
--- Solo el dueño puede actualizar su perfil
-create policy profiles_self_update on public.profiles
-  for update using (auth.uid() = id);
+  if not exists (select 1 from pg_policies where policyname = 'profiles_self_update') then
+    create policy profiles_self_update on public.profiles
+      for update using (auth.uid() = id);
+  end if;
+end $$;
 
 -- Properties
 alter table public.properties enable row level security;
 
--- Todos pueden ver propiedades aprobadas
-create policy properties_public_read on public.properties
-  for select using (
-    status = 'aprobada'
-    or auth.uid() = user_id
-    or (select role from public.profiles where id = auth.uid()) = 'admin'
-  );
+do $$
+begin
+  if not exists (select 1 from pg_policies where policyname = 'properties_public_read') then
+    create policy properties_public_read on public.properties
+      for select using (
+        status = 'aprobada'
+        or auth.uid() = user_id
+        or (select role from public.profiles where id = auth.uid()) = 'admin'
+      );
+  end if;
 
--- El dueño puede ver/editar/eliminar sus propiedades
-create policy properties_owner_crud on public.properties
-  for all using (auth.uid() = user_id);
+  if not exists (select 1 from pg_policies where policyname = 'properties_owner_crud') then
+    create policy properties_owner_crud on public.properties
+      for all using (auth.uid() = user_id);
+  end if;
 
--- Admin puede aprobar/rechazar
-create policy properties_admin_manage on public.properties
-  for all using (
-    (select role from public.profiles where id = auth.uid()) in ('admin', 'agent')
-  );
+  if not exists (select 1 from pg_policies where policyname = 'properties_admin_manage') then
+    create policy properties_admin_manage on public.properties
+      for all using (
+        (select role from public.profiles where id = auth.uid()) in ('admin', 'agent')
+      );
+  end if;
+end $$;
 
 -- Property Images
 alter table public.property_images enable row level security;
 
-create policy property_images_public_read on public.property_images
-  for select using (true);
+do $$
+begin
+  if not exists (select 1 from pg_policies where policyname = 'property_images_public_read') then
+    create policy property_images_public_read on public.property_images
+      for select using (true);
+  end if;
 
-create policy property_images_owner_crud on public.property_images
-  for all using (
-    exists (select 1 from public.properties where properties.id = property_images.property_id and properties.user_id = auth.uid())
-  );
+  if not exists (select 1 from pg_policies where policyname = 'property_images_owner_crud') then
+    create policy property_images_owner_crud on public.property_images
+      for all using (
+        exists (select 1 from public.properties where properties.id = property_images.property_id and properties.user_id = auth.uid())
+      );
+  end if;
+end $$;
 
 -- Property Views
 alter table public.property_views enable row level security;
 
-create policy property_views_insert on public.property_views
-  for insert with check (true);
+do $$
+begin
+  if not exists (select 1 from pg_policies where policyname = 'property_views_insert') then
+    create policy property_views_insert on public.property_views
+      for insert with check (true);
+  end if;
 
-create policy property_views_owner_read on public.property_views
-  for select using (
-    exists (select 1 from public.properties where properties.id = property_views.property_id and properties.user_id = auth.uid())
-  );
+  if not exists (select 1 from pg_policies where policyname = 'property_views_owner_read') then
+    create policy property_views_owner_read on public.property_views
+      for select using (
+        exists (select 1 from public.properties where properties.id = property_views.property_id and properties.user_id = auth.uid())
+      );
+  end if;
+end $$;
 
 -- Contact Requests
 alter table public.contact_requests enable row level security;
 
-create policy contact_requests_insert on public.contact_requests
-  for insert with check (true);
+do $$
+begin
+  if not exists (select 1 from pg_policies where policyname = 'contact_requests_insert') then
+    create policy contact_requests_insert on public.contact_requests
+      for insert with check (true);
+  end if;
 
-create policy contact_requests_owner_read on public.contact_requests
-  for select using (
-    exists (select 1 from public.properties where properties.id = contact_requests.property_id and properties.user_id = auth.uid())
-  );
+  if not exists (select 1 from pg_policies where policyname = 'contact_requests_owner_read') then
+    create policy contact_requests_owner_read on public.contact_requests
+      for select using (
+        exists (select 1 from public.properties where properties.id = contact_requests.property_id and properties.user_id = auth.uid())
+      );
+  end if;
+end $$;
 
 -- =====================================================
 -- FUNCTIONS & TRIGGERS
@@ -225,9 +270,14 @@ begin
 end;
 $$ language plpgsql security definer;
 
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+do $$
+begin
+  if not exists (select 1 from pg_trigger where tgname = 'on_auth_user_created') then
+    create trigger on_auth_user_created
+      after insert on auth.users
+      for each row execute procedure public.handle_new_user();
+  end if;
+end $$;
 
 -- Check Cédula/RNC uniqueness before insert
 create or replace function public.check_cedula_uniqueness()
@@ -245,23 +295,11 @@ begin
 end;
 $$ language plpgsql;
 
-create trigger cedula_uniqueness_check
-  before insert or update on public.profiles
-  for each row execute procedure public.check_cedula_uniqueness();
-
--- =====================================================
--- SEED DATA — Datos de ejemplo para desarrollo
--- =====================================================
-
--- Insert demo profiles (use fixed UUIDs for reproducibility)
-insert into auth.users (id, email, raw_user_meta_data, aud)
-values
-  ('00000000-0000-0000-0000-000000000001', 'demo@inmueblepro.com', '{"full_name": "Carlos Demo"}', 'authenticated'),
-  ('00000000-0000-0000-0000-000000000002', 'agente@inmueblepro.com', '{"full_name": "María Agente"}', 'authenticated')
-on conflict do nothing;
-
-insert into public.profiles (id, full_name, email, phone, cedula_rnc, is_agent, agent_verified, role)
-values
-  ('00000000-0000-0000-0000-000000000001', 'Carlos Demo', 'demo@inmueblepro.com', '+18095550100', '001-0000000-0', false, false, 'user'),
-  ('00000000-0000-0000-0000-000000000002', 'María Agente', 'agente@inmueblepro.com', '+18095550101', '1311234567', true, true, 'agent')
-on conflict (id) do nothing;
+do $$
+begin
+  if not exists (select 1 from pg_trigger where tgname = 'cedula_uniqueness_check') then
+    create trigger cedula_uniqueness_check
+      before insert or update on public.profiles
+      for each row execute procedure public.check_cedula_uniqueness();
+  end if;
+end $$;
