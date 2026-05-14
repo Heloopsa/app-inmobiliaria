@@ -14,14 +14,15 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
-// Fix Leaflet default marker icon
-const iconProto = L.Icon.Default.prototype as unknown as Record<string, unknown>;
-delete iconProto._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+// Fix Leaflet default marker icon - run only once
+if (typeof window !== "undefined") {
+  delete ((L.Icon.Default.prototype as unknown) as Record<string, unknown>)._getIconUrl;
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+  });
+}
 
 function priceLabel(p: Property): string {
   return p.currency === "USD"
@@ -54,6 +55,13 @@ export function PropertiesMap({
     const el = containerRef.current;
     if (!el) return;
 
+    // Ensure container has dimensions before initializing map
+    const rect = el.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      el.style.width = "100%";
+      el.style.height = "100%";
+    }
+
     // Destroy existing map if present
     if (mapRef.current) {
       mapRef.current.remove();
@@ -63,16 +71,67 @@ export function PropertiesMap({
     const focus = focusId
       ? memoizedProperties.find((p) => p.id === focusId)
       : undefined;
-    const center: L.LatLngExpression = focus
+    const center: [number, number] = focus
       ? [focus.lat, focus.lng]
       : [18.4861, -69.9312];
+
+    // Wait for container to be ready
+    if (!el.offsetWidth || !el.offsetHeight) {
+      requestAnimationFrame(() => {
+        if (!el.offsetWidth || !el.offsetHeight) {
+          el.style.width = "100vw";
+          el.style.height = "100vh";
+        }
+      });
+    }
+
+    let zoomLevel = focus ? 14 : 8;
+    
+    // Fit bounds first if no focus, then adjust zoom
+    if (!focus && memoizedProperties.length > 0) {
+      const validProps = memoizedProperties.filter(
+        (p) => p.lat && p.lng && !isNaN(p.lat) && !isNaN(p.lng)
+      );
+      if (validProps.length > 1) {
+        // Temporarily create map without zoom to calculate bounds
+        const tempMap = L.map(el, {
+          zoomControl: false,
+          scrollWheelZoom: false,
+          dragging: false,
+          touchZoom: false,
+          doubleClickZoom: false,
+          boxZoom: false,
+          keyboard: false,
+        });
+        
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: '',
+        }).addTo(tempMap);
+
+        const latlngs = validProps.map((p) => [p.lat, p.lng] as [number, number]);
+        const boundsObj = L.latLngBounds(latlngs);
+        tempMap.fitBounds(boundsObj, { padding: [50, 50] });
+        
+        const newZoom = tempMap.getZoom();
+        zoomLevel = Math.min(newZoom, 12); // Cap zoom level
+        
+        tempMap.remove();
+      }
+    }
 
     const map = L.map(el, {
       zoomControl: true,
       scrollWheelZoom: true,
-    }).setView(center, focus ? 14 : 8);
+      zoom: zoomLevel,
+    });
 
     mapRef.current = map;
+
+    // Invalidate size after adding to DOM
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+    });
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -110,12 +169,11 @@ export function PropertiesMap({
 
     map.addLayer(cluster);
 
-    // Fit bounds to show all markers
+    // Fit bounds to show all markers if not focused
     if (validProperties.length > 0 && !focus) {
-      const group = L.featureGroup(validProperties.map((p) =>
-        L.marker([p.lat, p.lng])
-      ));
-      map.fitBounds(group.getBounds().pad(0.1));
+      const latlngs = validProperties.map((p) => [p.lat, p.lng] as [number, number]);
+      const boundsObj = L.latLngBounds(latlngs);
+      map.fitBounds(boundsObj, { padding: [50, 50] });
     }
 
     const resize = () => map.invalidateSize();
@@ -125,6 +183,10 @@ export function PropertiesMap({
     return () => {
       window.clearTimeout(t);
       window.removeEventListener("resize", resize);
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
     };
   }, [memoizedProperties, focusId]);
 
