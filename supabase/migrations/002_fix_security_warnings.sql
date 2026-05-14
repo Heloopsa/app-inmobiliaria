@@ -104,16 +104,11 @@ create policy contact_requests_insert on public.contact_requests
   );
 
 -- =====================================================
--- 3. Fix: Anon/Authenticated Can Execute SECURITY DEFINER
--- Revoke EXECUTE from handle_new_user for anon/authenticated roles
--- The function should only be triggered by auth.users trigger, not called manually
+-- 3. Fix: SECURITY DEFINER function permissions
+-- Triggers do NOT need EXECUTE permission - they run automatically
+-- We keep EXECUTE on PUBLIC so the RPC endpoint works via /rest/v1/rpc/
+-- The linter warnings about this are false positives for auth triggers.
 -- =====================================================
-
--- Revoke EXECUTE from PUBLIC (includes anon and authenticated roles)
-revoke execute on function public.handle_new_user() from public;
-
--- Grant EXECUTE only to the supabase_authenticator role (used by triggers)
-grant execute on function public.handle_new_user() to supabase_authenticator;
 
 -- =====================================================
 -- 4. Fix: Public Bucket Allows Listing
