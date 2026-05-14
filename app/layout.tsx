@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { DarkModeProvider } from "@/hooks/use-dark-mode";
 import { ToastProvider } from "@/components/ui/toast";
 import { AuthToastHandler } from "@/components/auth-toast-handler";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -56,6 +57,7 @@ export default function RootLayout({
             <Footer />
           </DarkModeProvider>
         </ToastProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
