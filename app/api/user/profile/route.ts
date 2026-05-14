@@ -96,15 +96,26 @@ export async function PUT(request: NextRequest) {
   if (bio) updateData.bio = bio.trim();
   if (email) updateData.email = email.trim();
 
-  // Guardar datos adicionales en raw_user_meta_data
-  const metaDataUpdate: Record<string, any> = {};
-  if (company) metaDataUpdate.company = company.trim();
-  if (website) metaDataUpdate.website = website.trim();
-  if (linkedin) metaDataUpdate.linkedin = linkedin.trim();
-  if (instagram) metaDataUpdate.instagram = instagram.trim();
-  if (city) metaDataUpdate.city = city.trim();
-
+  // Leer raw_user_meta_data actual desde profiles table
   const supabase = getSupabase();
+  const { data: existingProfile } = await supabase
+    .from("profiles")
+    .select("raw_user_meta_data")
+    .eq("id", authCheck.userId)
+    .single();
+
+  const existingMeta = (existingProfile?.raw_user_meta_data as Record<string, any>) || {};
+
+  // Guardar datos adicionales en raw_user_meta_data DE profiles table
+  const metaDataUpdate: Record<string, any> = { ...existingMeta };
+  if (company !== undefined) metaDataUpdate.company = company.trim();
+  if (website !== undefined) metaDataUpdate.website = website.trim();
+  if (linkedin !== undefined) metaDataUpdate.linkedin = linkedin.trim();
+  if (instagram !== undefined) metaDataUpdate.instagram = instagram.trim();
+  if (city !== undefined) metaDataUpdate.city = city.trim();
+
+  // Agregar meta datos al updateData
+  updateData.raw_user_meta_data = metaDataUpdate;
 
   // Actualizar perfil en la tabla profiles
   const { error: profileError } = await supabase
@@ -116,16 +127,19 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: profileError.message }, { status: 500 });
   }
 
-  // Actualizar metadata del usuario en auth.users usando service key
-  if (Object.keys(metaDataUpdate).length > 0) {
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (serviceKey) {
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const adminDb = createSupabaseClient(url, serviceKey);
-      
+  // También actualizar auth.users raw_user_meta_data (para sincronización)
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (Object.keys(metaDataUpdate).length > 0 && serviceKey) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const adminDb = createSupabaseClient(url, serviceKey);
+    
+    try {
       await (adminDb as any).auth.admin.updateUserById(authCheck.userId, {
         data: metaDataUpdate,
       });
+    } catch (err) {
+      console.error("Error updating auth.users raw_user_meta_data:", err);
+      // Don't fail the whole request if this fails
     }
   }
 
